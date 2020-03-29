@@ -16,7 +16,6 @@ html1="""
     <div class="shadow  bg-white rounded">
         <nav class="navbar navbar-custom">
             <a class="navbar-brand" href="#">
-              <img src="../Bootstrap/ff.png" width="30" height="30" alt="">
               Go-Karona (WayBackUrls) 
             </a>
             
