@@ -97,7 +97,10 @@ def query(domain,path,param):
 
 def waybackurls(hosts):
     url = 'http://web.archive.org/cdx/search/cdx?url={}/*&output=json&fl=original&collapse=urlkey'.format(hosts)
-    r = requests.get(url)
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1'
+    }
+    r = requests.get(url,headers=headers)
     results = r.text
     return results[1:]
 
