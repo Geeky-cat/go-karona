@@ -7,66 +7,67 @@ import requests
 import json
 from operator import itemgetter
 
+def waybackurls(hosts):
+    url = 'http://web.archive.org/cdx/search/cdx?url={}/*&output=json&fl=original&collapse=urlkey'.format(hosts)
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1'
+    }
+    r = requests.get(url,headers=headers)
+    results = r.text
+    return results[1:]
 
 
+def execute(urls):
+    html=""""""
+    first_item = itemgetter(0)
+    site = sys.argv[1]
+    site=site.replace('*','')
+    site = re.escape(site)
+    pattern = '([a-zA-Z0-9\.-]*'+site+'[:0-9]{0,5})(\/[^?\s]*)(.*)?'
+    result = re.findall(pattern, urls)
+    new_list = sorted(result, key=first_item) # lexicographically sorted
+    unique_domains=[]
+    patharr=[]
+    for domains in new_list:
+        if domains[0] not in unique_domains:
+            unique_domains.append(domains[0])
+    for domain in unique_domains:
+        print domain
+        escap=re.escape(domain)
+        pattern='({})(.*)'.format(escap)
+        result = re.findall(pattern, urls)
+        for path in result:
+            patharr.append(path[1])
+
+        html=html+build(domain,patharr)
+        patharr=[]
+    return html
+   
+def build(domain,patharr):
+    html="""
+    <li class="alert alert-primary" ><span><i class="icon-folder-open"></i> {}<a href="http://{}" target="_blank"> 🔗 </a></span><ul>{}</ul></li>
+    """.format(domain,domain,path(domain,patharr))
+    return html
 
 def unique_path(domain,latter):
     arr=[]
     for each in latter:
-        site=domain.replace('.','\.')
+        site=re.escape(domain)
         pattern = '([a-zA-Z0-9\.-]*'+site+'[:0-9]{0,5})(\/[^?\s]*)(.*)?'
         st=domain+each
         result = re.findall(pattern, st)
-        each=result[0][1]
-        if each not in arr:
-            arr.append(each)
+        if result:
+            each=result[0][1]
+            if each not in arr:
+                arr.append(each)
     return arr
+
 def sign_latter(domain,latter):
     s=""
     for each in latter:
         each=domain+each
         s=s+each+'\n'
-    return s 
-
-def execute(urls):
-    hsts=""""""
-    # Sorting list based on domain
-    first_item = itemgetter(0)
-    string = ""
-    site = sys.argv[1]
-    line = re.sub('\"\],?', '', urls)
-    string += line
-
-     # Domain Name
-    site=site.replace('*','')
-    site = re.escape(site)
-    pattern = '([a-zA-Z0-9\.-]*'+site+'[:0-9]{0,5})(\/[^?\s]*)(.*)?'
-    result = re.findall(pattern, string)
-    new_list = sorted(result, key=first_item) # lexicographically sorted
-
-    fin_domain=[]
-    path_arr=[]
-
-    for each in new_list:
-        curren_domain=each[0]
-        if curren_domain not in fin_domain:
-            fin_domain.append(curren_domain)
-            #print curren_domain
-            #Things to do
-            for each1 in new_list:
-                if each1[0]==curren_domain:
-                    path_arr.append(each1[1]+each1[2])
-                    #Things to do
-                
-            hsts=hsts+build(curren_domain,path_arr)
-        path_arr=[]
-    return hsts
-
-def build(domain,latter):
-    html="""
-    <li class="alert alert-primary" ><span><i class="icon-folder-open"></i> {}<a href="http://{}" target="_blank"> 🔗 </a></span><ul>{}</ul></li>
-    """.format(domain,domain,path(domain,latter))
-    return html
+    return s
 
 def path(domain,latter):
     html=""""""
@@ -84,8 +85,8 @@ def path(domain,latter):
         html=html+"""<li class="alert alert-dark"><span><i class="icon-minus-sign"></i> {}<a href="http://{}" target="_blank"> 🔗 </a></span> <ul>{}</ul></li>""".format(current_path,domain+current_path,query(domain,current_path,param))
         param=[]
     return html
-          
-        
+
+
 def query(domain,path,param):
     html=""""""
     for each1 in param:
@@ -93,16 +94,6 @@ def query(domain,path,param):
     return html
 
 
-
-
-def waybackurls(hosts):
-    url = 'http://web.archive.org/cdx/search/cdx?url={}/*&output=json&fl=original&collapse=urlkey'.format(hosts)
-    headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1'
-    }
-    r = requests.get(url,headers=headers)
-    results = r.text
-    return results[1:]
 
 
 if __name__ == "__main__":
@@ -123,14 +114,13 @@ You Got to wait.................................................
     """
     argc = len(sys.argv)
     if argc < 2:
-        print 'Usage:\n\tpython corona.py <url> '
+        print 'Usage:\n\tpython go-karona.py <url> '
         sys.exit()
     host=sys.argv[1]
     urls = waybackurls(host)
-    json_urls = urls
-    json_urls=json_urls.strip('[\"')
-    json_urls=json_urls.strip('\"],')
-    if urls:        
+    pattern='(\[\"|\"\]\,?\]?)'
+    urls=re.sub(pattern, '', urls)
+    if urls:
         f = open("{}-waybackurls.html".format(host), "w")
         f.write(template.html1+execute(urls)+template.html2)
         f.close()
