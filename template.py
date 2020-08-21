@@ -10,6 +10,10 @@ html1="""
     <link rel="stylesheet" type="text/css" href="./Assets/css/css.css">
     <link rel="stylesheet" type="text/css" href="./Assets/css/nav.css">
     <script src="./Assets/js/script.js"></script>
+    <script src="./Assets/js/app.js" defer></script>
+    """
+
+html2="""
     
 </head>
 <body>
@@ -25,10 +29,7 @@ html1="""
         <hr>
     <div class="container">
     <div class="tree well">
-        <ul>
-"""
-
-html2="""
+        <ul id="tsi">
         </ul>
     </div>
 </div>
