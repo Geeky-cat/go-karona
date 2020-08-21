@@ -40,7 +40,7 @@ function create(type,name,path,paths,param){
         var text=""
         var params=data[name][path]
         params.forEach(function(parameter){
-            if(parameter!="" || parameter!="?")
+            if(parameter!="")
             {
              text+=create("PARAM",name,path,paths,parameter)
             }
